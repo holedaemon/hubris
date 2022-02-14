@@ -1,4 +1,4 @@
-package api
+package resources
 
 import (
 	"context"
@@ -10,10 +10,16 @@ import (
 	"github.com/holedaemon/hubris/internal/discord/types"
 )
 
+const (
+	base    = "https://discord.com/api/v"
+	version = "9"
+
+	root = base + version
+)
+
 var defaultHeader = make(http.Header)
 
 func init() {
-
 	defaultHeader.Set("Accept", "application/json")
 	defaultHeader.Set("Content-Type", "application/json")
 }
@@ -60,6 +66,8 @@ func (rc *RestClient) newRequest(ctx context.Context, uri, method string, opts .
 			h.Set(k, ro.Header.Get(k))
 		}
 	}
+
+	req.Header = h
 
 	if ro.Query != nil {
 		req.URL.RawQuery = ro.Query.Encode()

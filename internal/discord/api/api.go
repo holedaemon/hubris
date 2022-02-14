@@ -6,13 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-)
 
-const (
-	base    = "https://discord.com/api/v"
-	version = "9"
-
-	root = base + version
+	"github.com/holedaemon/hubris/internal/discord/api/resources"
 )
 
 type Client struct {
@@ -47,7 +42,7 @@ func New(t string, opts ...Option) (*Client, error) {
 }
 
 func (c *Client) GetGateway(ctx context.Context) (string, error) {
-	rc := NewRestClient("", c.cli)
+	rc := resources.NewRestClient("", c.cli)
 
 	var resp struct {
 		URL string `json:"url"`
