@@ -12,3 +12,9 @@ type Emoji struct {
 	Animated      bool        `json:"animated,omitempty"`
 	Available     bool        `json:"available,omitempty"`
 }
+
+type Reaction struct {
+	Count int    `json:"count"`
+	Me    bool   `json:"me"`
+	Emoji *Emoji `json:"emoji"`
+}
