@@ -25,9 +25,9 @@ type identify struct {
 	Properties     *identifyProperties `json:"properties"`
 	Compress       bool                `json:"compress,omitempty"`
 	LargeThreshold int                 `json:"large_threshold,omitempty"`
-	Shard          [2]int              `json:"shard,omitempty"`
-	Presence       *types.Presence     `json:"presence,omitempty"`
-	Intents        types.GatewayIntent `json:"intents"`
+	// Shard          [2]int              `json:"shard,omitempty"`
+	Presence *types.Presence     `json:"presence,omitempty"`
+	Intents  types.GatewayIntent `json:"intents"`
 }
 
 func (c *Client) sendIdentify(ctx context.Context, ws *ws.Conn) error {
@@ -37,7 +37,7 @@ func (c *Client) sendIdentify(ctx context.Context, ws *ws.Conn) error {
 		Intents:    types.GatewayIntentGuildsAll,
 	}
 
-	if err := ws.Write(ctx, idf); err != nil {
+	if err := write(ctx, ws, opIdentify, idf); err != nil {
 		return err
 	}
 

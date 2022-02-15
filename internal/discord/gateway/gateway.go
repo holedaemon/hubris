@@ -3,7 +3,6 @@ package gateway
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
@@ -170,10 +169,5 @@ func (c *Client) Connect(pc context.Context) error {
 }
 
 func (c *Client) beat(ctx context.Context, ws *ws.Conn) error {
-	pay := &payload{
-		Op: opHeartbeat,
-		D:  json.RawMessage(c.sequence.String()),
-	}
-
-	return ws.Write(ctx, pay)
+	return write(ctx, ws, opHeartbeat, c.sequence.Load())
 }

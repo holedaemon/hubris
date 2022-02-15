@@ -19,5 +19,5 @@ func (c *Client) sendResume(ctx context.Context, ws *ws.Conn) error {
 		Seq:       c.sequence.Load(),
 	}
 
-	return ws.Write(ctx, r)
+	return write(ctx, ws, opResume, r)
 }

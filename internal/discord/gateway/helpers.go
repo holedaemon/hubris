@@ -61,3 +61,18 @@ func read(ctx context.Context, ws *ws.Conn, v interface{}) error {
 
 	return nil
 }
+
+func write(ctx context.Context, ws *ws.Conn, op opcode, v interface{}) error {
+	p := &payload{
+		Op: op,
+	}
+
+	raw, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	p.D = raw
+
+	return ws.Write(ctx, p)
+}
