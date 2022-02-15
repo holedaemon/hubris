@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/holedaemon/hubris/internal/discord/api"
@@ -26,6 +27,7 @@ const (
 var defaultBackoff = exp.New(time.Second*1, time.Second*120, 1.6, 0.2)
 
 type Client struct {
+	mu    sync.Mutex
 	token string
 
 	url string
@@ -35,6 +37,8 @@ type Client struct {
 	lastAck   *atomic.Int64
 	sequence  *atomic.Int64
 	sessionID string
+
+	handlers map[string]handler
 
 	backoff *exp.Backoff
 }
@@ -48,6 +52,7 @@ func New(t string) (*Client, error) {
 		token:     t,
 		lastAck:   atomic.NewInt64(0),
 		sequence:  atomic.NewInt64(0),
+		handlers:  make(map[string]handler),
 		connected: atomic.NewBool(false),
 		backoff:   defaultBackoff,
 	}, nil
