@@ -14,7 +14,9 @@ import (
 	"github.com/holedaemon/hubris/internal/pkg/exp"
 	"github.com/holedaemon/hubris/internal/pkg/heart"
 	"github.com/holedaemon/hubris/internal/pkg/ws"
+	"github.com/zikaeroh/ctxlog"
 	"go.uber.org/atomic"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 	"nhooyr.io/websocket"
 )
@@ -28,6 +30,7 @@ var defaultBackoff = exp.New(time.Second*1, time.Second*120, 1.6, 0.2)
 type Client struct {
 	mu    sync.Mutex
 	token string
+	debug bool
 
 	url string
 
@@ -40,25 +43,34 @@ type Client struct {
 	handlers map[string]handler
 
 	backoff *exp.Backoff
+	logger  *zap.Logger
 }
 
-func New(t string) (*Client, error) {
+func New(t string, opts ...Option) (*Client, error) {
 	if t == "" {
 		return nil, errors.New("discord/gateway: token required")
 	}
 
-	return &Client{
+	c := &Client{
 		token:     t,
 		lastAck:   atomic.NewInt64(0),
 		sequence:  atomic.NewInt64(0),
 		handlers:  make(map[string]handler),
 		connected: atomic.NewBool(false),
 		backoff:   defaultBackoff,
-	}, nil
+	}
+
+	for _, o := range opts {
+		o(c)
+	}
+
+	c.logger = ctxlog.New(c.debug)
+	return c, nil
 }
 
 func (c *Client) connect(pc context.Context) (*errgroup.Group, error) {
 	ctx := context.Background()
+	ctx = ctxlog.WithLogger(ctx, c.logger)
 
 	header := make(http.Header)
 	header.Set("Accept-Encoding", "zlib")
@@ -73,6 +85,7 @@ func (c *Client) connect(pc context.Context) (*errgroup.Group, error) {
 
 		if err != nil {
 			ws.Close(websocket.StatusInternalError, "internal error")
+			ctxlog.Error(ctx, "error during lifetime", zap.Error(err))
 		} else {
 			ws.Close(websocket.StatusNormalClosure, "normal")
 		}
@@ -85,21 +98,22 @@ func (c *Client) connect(pc context.Context) (*errgroup.Group, error) {
 
 	if c.sequence.Load() == 0 && c.sessionID == "" {
 		if err := c.sendIdentify(ctx, ws); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: sending identify payload", err)
 		}
 
 		if err := c.getReady(ctx, ws); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: receiving Ready payload", err)
 		}
 	} else {
 		if err := c.sendResume(ctx, ws); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%w: sending resume payload", err)
 		}
 	}
 
 	grp, ctx := errgroup.WithContext(ctx)
 
 	grp.Go(func() error {
+		ctxlog.Debug(ctx, "listening for cancellation signal")
 		<-pc.Done()
 		return ctx.Err()
 	})
@@ -146,6 +160,7 @@ func (c *Client) Connect(pc context.Context) error {
 	err = grp.Wait()
 	if shouldReconnect(err) {
 		for i := 0; true; i++ {
+			c.logger.Info("disconnected, attempting to reconnect", zap.Int("attempt", i))
 			dur := c.backoff.Attempt(i)
 
 			time.Sleep(dur)
@@ -169,5 +184,6 @@ func (c *Client) Connect(pc context.Context) error {
 }
 
 func (c *Client) beat(ctx context.Context, ws *ws.Conn) error {
+	ctxlog.Debug(ctx, "sending heartbeat payload")
 	return write(ctx, ws, opHeartbeat, c.sequence.Load())
 }
