@@ -4,6 +4,11 @@
     "options": [
         {
             "type": 1,
+            "name": "init",
+            "description": "Create or import common pronoun roles into the bot."
+        },
+        {
+            "type": 1,
             "name": "create",
             "description": "Create a pronoun role within the server.",
             "options": [

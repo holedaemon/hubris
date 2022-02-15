@@ -34,6 +34,6 @@ type ResolvedData struct {
 	Members  map[string]*GuildMember `json:"members,omitempty"`
 	Roles    map[string]*Role        `json:"roles,omitempty"`
 	Channels map[string]*Channel     `json:"channels,omitempty"`
-	// Messages
+	Messages map[string]*Message     `json:"messages,omitempty"`
 	// Attachments
 }
