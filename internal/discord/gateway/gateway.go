@@ -18,7 +18,6 @@ import (
 	"go.uber.org/atomic"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
-	"nhooyr.io/websocket"
 )
 
 const (
@@ -43,6 +42,7 @@ type Client struct {
 	handlers map[string]handler
 
 	backoff *exp.Backoff
+	beater  *heart.Beater
 	logger  *zap.Logger
 }
 
@@ -57,6 +57,7 @@ func New(t string, opts ...Option) (*Client, error) {
 		sequence:  atomic.NewInt64(0),
 		handlers:  make(map[string]handler),
 		connected: atomic.NewBool(false),
+		beater:    heart.NewBeater(),
 		backoff:   defaultBackoff,
 	}
 
@@ -68,7 +69,7 @@ func New(t string, opts ...Option) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) connect(pc context.Context) (*errgroup.Group, error) {
+func (c *Client) connect(pc context.Context) error {
 	ctx := context.Background()
 	ctx = ctxlog.WithLogger(ctx, c.logger)
 
@@ -77,56 +78,19 @@ func (c *Client) connect(pc context.Context) (*errgroup.Group, error) {
 
 	ws, err := ws.Dial(ctx, c.url, header)
 	if err != nil {
-		return nil, err
-	}
-
-	defer func() {
-		c.connected.Store(false)
-
-		if err != nil {
-			ws.Close(websocket.StatusInternalError, "internal error")
-			ctxlog.Error(ctx, "error during lifetime", zap.Error(err))
-		} else {
-			ws.Close(websocket.StatusNormalClosure, "normal")
-		}
-	}()
-
-	var h *hello
-	if err := read(ctx, ws, &h); err != nil {
-		return nil, fmt.Errorf("%w: reading initial Hello", err)
-	}
-
-	if c.sequence.Load() == 0 && c.sessionID == "" {
-		if err := c.sendIdentify(ctx, ws); err != nil {
-			return nil, fmt.Errorf("%w: sending identify payload", err)
-		}
-
-		if err := c.getReady(ctx, ws); err != nil {
-			return nil, fmt.Errorf("%w: receiving Ready payload", err)
-		}
-	} else {
-		if err := c.sendResume(ctx, ws); err != nil {
-			return nil, fmt.Errorf("%w: sending resume payload", err)
-		}
+		return err
 	}
 
 	grp, ctx := errgroup.WithContext(ctx)
-
 	grp.Go(func() error {
-		ctxlog.Debug(ctx, "listening for cancellation signal")
-		<-pc.Done()
-		return ctx.Err()
-	})
-
-	grp.Go(func() error {
-		return heart.Pump(ctx, time.Millisecond*time.Duration(h.HeartbeatInterval), ws, c.beat)
+		return c.beater.Pump(ctx, ws, c.beat)
 	})
 
 	grp.Go(func() error {
 		return c.read(ctx, ws)
 	})
 
-	return grp, nil
+	return grp.Wait()
 }
 
 func (c *Client) Connect(pc context.Context) error {
@@ -152,12 +116,11 @@ func (c *Client) Connect(pc context.Context) error {
 		c.url = u + "?" + q.Encode()
 	}
 
-	grp, err := c.connect(pc)
+	err := c.connect(pc)
 	if err != nil {
 		return err
 	}
 
-	err = grp.Wait()
 	if shouldReconnect(err) {
 		for i := 0; true; i++ {
 			c.logger.Info("disconnected, attempting to reconnect", zap.Int("attempt", i))
@@ -166,12 +129,11 @@ func (c *Client) Connect(pc context.Context) error {
 			time.Sleep(dur)
 
 			ctx := context.Background()
-			grp, err = c.connect(ctx)
+			err = c.connect(ctx)
 			if err != nil {
 				continue
 			}
 
-			err = grp.Wait()
 			if !shouldReconnect(err) {
 				return err
 			}

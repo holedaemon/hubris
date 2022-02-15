@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/zlib"
 	"context"
-	"encoding/json"
+	"io"
 	"net/http"
 	"sync"
 
@@ -36,37 +36,29 @@ func (ws *Conn) Close(st websocket.StatusCode, m string) error {
 }
 
 // Read reads from a connection.
-func (ws *Conn) Read(ctx context.Context, v interface{}) error {
+func (ws *Conn) Read(ctx context.Context) (io.Reader, error) {
 	ws.mu.RLock()
-	defer ws.mu.RUnlock()
+	mt, rdr, err := ws.conn.Reader(ctx)
+	ws.mu.RUnlock()
 
-	typ, raw, err := ws.conn.Read(ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	in := bytes.NewBuffer(raw)
-
-	if typ == websocket.MessageBinary {
-		zr, err := zlib.NewReader(in)
-		if err != nil {
-			return err
-		}
-
-		if err := json.NewDecoder(zr).Decode(&v); err != nil {
-			return err
-		}
-
-		zr.Close()
-
-		return nil
+	if mt == websocket.MessageText {
+		return rdr, nil
 	}
 
-	if err := json.NewDecoder(in).Decode(&v); err != nil {
-		return err
+	zr, err := zlib.NewReader(rdr)
+	if err != nil {
+		return nil, err
 	}
 
-	return err
+	var out bytes.Buffer
+
+	io.Copy(&out, zr)
+	zr.Close()
+	return &out, nil
 }
 
 // Write writes to a connection.

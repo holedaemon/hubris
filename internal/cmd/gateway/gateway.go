@@ -39,7 +39,7 @@ func main() {
 }
 
 func handleReady(ctx context.Context, r *gateway.Ready) {
-	fmt.Println(r)
+	fmt.Printf("Logged in as %s\n", r.User.Username)
 }
 
 func handleMessage(ctx context.Context, m *types.Message) {

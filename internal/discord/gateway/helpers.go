@@ -49,19 +49,6 @@ func shouldReconnect(err error) bool {
 	return rec
 }
 
-func read(ctx context.Context, ws *ws.Conn, v interface{}) error {
-	var p *payload
-	if err := ws.Read(ctx, &p); err != nil {
-		return err
-	}
-
-	if err := json.Unmarshal(p.D, &v); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func write(ctx context.Context, ws *ws.Conn, op opcode, v interface{}) error {
 	p := &payload{
 		Op: op,

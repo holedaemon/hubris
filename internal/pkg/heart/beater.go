@@ -6,28 +6,49 @@ import (
 
 	"github.com/holedaemon/hubris/internal/pkg/ws"
 	"github.com/zikaeroh/ctxlog"
-	"go.uber.org/zap"
 )
 
 // Beat is called when Pump ticks.
 type Beat func(context.Context, *ws.Conn) error
 
-// Pump beats the heart once every interval.
-func Pump(ctx context.Context, interval time.Duration, c *ws.Conn, fn Beat) error {
-	tkr := time.NewTicker(interval)
-	ctxlog.Debug(ctx, "creating new heartbeat ticker", zap.Duration("every", interval))
+type Beater struct {
+	ch chan time.Duration
+}
+
+func NewBeater() *Beater {
+	return &Beater{
+		ch: make(chan time.Duration),
+	}
+}
+
+func (b *Beater) Notify(nd time.Duration) {
+	b.ch <- nd
+}
+
+func (b *Beater) Pump(ctx context.Context, ws *ws.Conn, fn Beat) error {
+	var tkr *time.Ticker
+
+	select {
+	case d := <-b.ch:
+		tkr = time.NewTicker(d * time.Millisecond)
+	case <-ctx.Done():
+		if tkr != nil {
+			tkr.Stop()
+		}
+
+		return ctx.Err()
+	}
 
 	for {
 		select {
-		case <-ctx.Done():
-			ctxlog.Debug(ctx, "heartbeater received cancellation signal")
-			tkr.Stop()
-			return ctx.Err()
 		case <-tkr.C:
 			ctxlog.Debug(ctx, "heartbeater has ticked")
-			if err := fn(ctx, c); err != nil {
+			if err := fn(ctx, ws); err != nil {
 				return err
 			}
+		case <-ctx.Done():
+			tkr.Stop()
+			return ctx.Err()
 		}
 	}
 }

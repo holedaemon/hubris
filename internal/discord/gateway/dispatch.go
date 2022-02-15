@@ -6,6 +6,8 @@ import (
 	"time"
 
 	"github.com/holedaemon/hubris/internal/discord/types"
+	"github.com/zikaeroh/ctxlog"
+	"go.uber.org/zap"
 )
 
 type handler interface {
@@ -33,6 +35,7 @@ func (c *Client) registerEvent(ev string, h handler) {
 }
 
 func (c *Client) dispatch(ctx context.Context, ev string, data json.RawMessage) error {
+	ctxlog.Debug(ctx, "received event", zap.String("event", ev))
 	var v interface{}
 
 	switch ev {
@@ -42,6 +45,9 @@ func (c *Client) dispatch(ctx context.Context, ev string, data json.RawMessage) 
 		if err := json.Unmarshal(data, &r); err != nil {
 			return err
 		}
+
+		c.sessionID = r.SessionID
+		c.connected.Store(true)
 
 		v = r
 	case eventGuildCreate:
