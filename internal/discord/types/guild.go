@@ -106,18 +106,18 @@ type Guild struct {
 	VerificationLevel           VerificationLevel               `json:"verification_level"`
 	DefaultMessageNotifications DefaultMessageNotificationLevel `json:"default_message_notifications"`
 	ExplicitContentFilter       ExplicitContentFilterLevel      `json:"explicit_content_filter"`
-	// Roles []*Role `json:"roles"`
-	// Emojis []*Emoji `json:"emojis"`
-	Features           []GuildFeature    `json:"features"`
-	MFALevel           MFALevel          `json:"mfa_level"`
-	ApplicationID      null.String       `json:"application_id"`
-	SystemChannelID    null.String       `json:"system_channel_id"`
-	SystemChannelFlags SystemChannelFlag `json:"system_channel_flags"`
-	RulesChannelID     null.String       `json:"rules_channel_id"`
-	JoinedAt           Time              `json:"joined_at,omitempty"`
-	Large              bool              `json:"large,omitempty"`
-	Unavailable        bool              `json:"unavailable,omitempty"`
-	MemberCount        int               `json:"member_count,omitempty"`
+	Roles                       []*Role                         `json:"roles"`
+	Emojis                      []*Emoji                        `json:"emojis"`
+	Features                    []GuildFeature                  `json:"features"`
+	MFALevel                    MFALevel                        `json:"mfa_level"`
+	ApplicationID               null.String                     `json:"application_id"`
+	SystemChannelID             null.String                     `json:"system_channel_id"`
+	SystemChannelFlags          SystemChannelFlag               `json:"system_channel_flags"`
+	RulesChannelID              null.String                     `json:"rules_channel_id"`
+	JoinedAt                    Time                            `json:"joined_at,omitempty"`
+	Large                       bool                            `json:"large,omitempty"`
+	Unavailable                 bool                            `json:"unavailable,omitempty"`
+	MemberCount                 int                             `json:"member_count,omitempty"`
 	// VoiceStates []*VoiceState `json:"voice_states,omitempty"`
 	Members                  []*GuildMember `json:"members,omitempty"`
 	Channels                 []*Channel     `json:"channels,omitempty"`
