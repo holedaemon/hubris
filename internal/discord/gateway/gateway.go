@@ -136,7 +136,7 @@ func (c *Client) Connect(pc context.Context) error {
 		q.Set("v", version)
 		q.Set("encoding", "json")
 
-		c.url = u + q.Encode()
+		c.url = u + "?" + q.Encode()
 	}
 
 	grp, err := c.connect(pc)
