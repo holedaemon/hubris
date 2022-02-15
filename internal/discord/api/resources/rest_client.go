@@ -1,6 +1,7 @@
 package resources
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"io"
@@ -42,6 +43,12 @@ type requestOptions struct {
 	Body   io.Reader
 	Query  url.Values
 	Header http.Header
+}
+
+func WithBody(b []byte) RequestOption {
+	return func(ro *requestOptions) {
+		ro.Body = bytes.NewBuffer(b)
+	}
 }
 
 func (rc *RestClient) newRequest(ctx context.Context, uri, method string, opts ...RequestOption) (*http.Request, error) {
