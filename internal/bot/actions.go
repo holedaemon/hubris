@@ -25,7 +25,7 @@ func actionWaste(ctx context.Context, c *Context) {
 	}
 
 	if c.Message.Type != types.MessageTypeReply {
-		c.Reply(ctx, "Who's are you'se wanting me to hit's, boss?")
+		c.Reply(ctx, "Who's you'se wanting me to hit's, boss?")
 		return
 	}
 
@@ -33,7 +33,7 @@ func actionWaste(ctx context.Context, c *Context) {
 	if err != nil {
 		switch err := err.(type) {
 		case *types.Error:
-			c.Reply(ctx, "Sorry's boss, da feds gots in da way, boss: \"%s\"", err.Error())
+			c.Reply(ctx, "Sorry's boss, da feds gots in da way: \"%s\"", err.Error())
 			return
 		default:
 			if errors.Is(err, errNotReply) {
