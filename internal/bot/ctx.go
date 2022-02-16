@@ -55,6 +55,9 @@ func (c *Context) Timeout(ctx context.Context) error {
 	f := rand.Intn(10)
 	t := time.Now().Add(time.Duration(f) * time.Minute)
 
+	ctx = ctxlog.With(ctx, zap.String("user_id", c.Message.ReferencedMessage.Author.ID), zap.String("guild_id", c.Message.GuildID))
+	ctxlog.Info(ctx, "attempting to time out user", zap.Time("until", t))
+
 	_, err := c.Guild.ModifyGuildMember(ctx,
 		c.Message.ReferencedMessage.Author.ID,
 		&guild.ModifyGuildMemberParams{
