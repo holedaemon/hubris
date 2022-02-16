@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - trunk
+  pull_request:
+    branches:
+      - trunk
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Get Version
+    run: |
+      VERSION="r$(git rev-list --count HEAD).$(git rev-parse --short HEAD)"
+      echo VERSION=$VERSION >> $GITHUB_ENV
+    
+    - name: Setup Go
+    uses: action/setup-go@v2
+    with:
+      go-version: '^1.17'
+    
+    - name: Tidy module
+    run: go mod tidy
+
+    - name: golangci-lint
+    uses: golangci/golangci-lint-action@v2
+
+    - name: Turnstyle
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/head/trunk' }}
+    uses: softprops/turnstyle@v1
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Build Image
+    run: docker build --file Dockerfile --tag hubris:latest --tag hubris:${{ env.VERSION }} --build-arg version=${{ env.VERSION }} .
+
+    - name: Push to GitHub
+    if: ${{ github.repository == 'holedaemon/hubris' && github.event_name == 'push' && github.ref == 'refs/head/trunk' }}
+    run: |
+      echo '${{ secrets.GITHUB_TOKEN }}' | docker login ghcr.io -u $GITHUB_ACTOR --password-stdin
+      docker tag hubris:latest ghcr.io/holedaemon/hubris:latest
+      docker tag hubris:${{ env.VERSION }} ghcr.io/holedaemon/hubris:${{ env.VERSION }}
+      docker push ghcr.io/holedaemon/hubris:latest
+      docker push ghcr.io/holedaemon/hubris:${{ env.VERSION }} 
