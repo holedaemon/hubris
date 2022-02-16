@@ -2,16 +2,17 @@ package gateway
 
 type opcode int
 
+//nolint
 const (
 	opDispatch opcode = iota
 	opHeartbeat
 	opIdentify
-	opPresenceUpdate   //nolint:deadcode
-	opVoiceStateUpdate //nolint:deadcode
+	opPresenceUpdate
+	opVoiceStateUpdate
 	_
 	opResume
 	opReconnect
-	opRequestGuildMembers //nolint:deadcode
+	opRequestGuildMembers
 	opInvalidSession
 	opHello
 	opHeartbeatAck
