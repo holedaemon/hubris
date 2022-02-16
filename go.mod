@@ -3,6 +3,7 @@ module github.com/holedaemon/hubris
 go 1.17
 
 require (
+	github.com/alecthomas/kong v0.4.1
 	github.com/zikaeroh/ctxlog v0.0.0-20210526021226-f475ac537d51
 	go.uber.org/atomic v1.9.0
 	go.uber.org/zap v1.21.0
