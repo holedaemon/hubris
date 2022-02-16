@@ -139,8 +139,10 @@ func (rc *RestClient) Delete(ctx context.Context, url string, v interface{}, opt
 
 	defer res.Body.Close()
 
-	if err := json.NewDecoder(res.Body).Decode(&v); err != nil {
-		return err
+	if v != nil {
+		if err := json.NewDecoder(res.Body).Decode(&v); err != nil {
+			return err
+		}
 	}
 
 	return nil

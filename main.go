@@ -13,10 +13,15 @@ func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Kill)
 	defer cancel()
 
-	var app cli.App
+	app := cli.App{
+		Global: cli.Global{},
+	}
+
 	ktx := kong.Parse(&app)
 
+	ktx.Bind(&app.Global)
 	ktx.BindTo(ctx, (*context.Context)(nil))
-	err := ktx.Run(ctx)
+
+	err := ktx.Run(ctx, cli.Global{})
 	ktx.FatalIfErrorf(err)
 }

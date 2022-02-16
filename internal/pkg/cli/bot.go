@@ -6,15 +6,14 @@ import (
 	"github.com/holedaemon/hubris/internal/bot"
 )
 
-type BotCmd struct {
-	Token string `help:"The bot's OAuth2 token." required:"" short:"t" env:"HUBRIS_TOKEN"`
-	Debug bool   `help:"Run in debug mode?" default:"false" short:"d"`
+type RunCmd struct {
+	Debug bool `help:"Run in debug mode?" default:"false" short:"d"`
 }
 
-func (c *BotCmd) Run(ctx context.Context) error {
+func (c *RunCmd) Run(ctx context.Context, g *Global) error {
 	b, err := bot.New(&bot.Options{
 		Debug: c.Debug,
-		Token: c.Token,
+		Token: g.Token,
 	})
 	if err != nil {
 		return err
