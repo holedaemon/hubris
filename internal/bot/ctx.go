@@ -65,7 +65,7 @@ func (c *Context) Timeout(ctx context.Context) error {
 		},
 	)
 	if err != nil {
-		ctxlog.Error(ctx, "error timing out user", zap.String("user_id", c.Message.Author.ID), zap.Error(err))
+		ctxlog.Error(ctx, "error timing out user", zap.Error(err))
 	}
 	return err
 }
