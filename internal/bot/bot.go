@@ -1,6 +1,7 @@
 package bot
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/holedaemon/hubris/internal/discord/api"
@@ -42,12 +43,18 @@ func New(opts *Options) (*Bot, error) {
 
 	b.api = a
 
-	g, err := gateway.New(opts.Token)
+	g, err := gateway.New(opts.Token, gateway.Debug())
 	if err != nil {
 		return nil, err
 	}
 
+	g.OnMessageCreate(b.handleMessageCreate)
+
 	b.gateway = g
 
 	return b, nil
+}
+
+func (b *Bot) Connect(ctx context.Context) error {
+	return b.gateway.Connect(ctx)
 }
