@@ -6,12 +6,12 @@ const (
 	opDispatch opcode = iota
 	opHeartbeat
 	opIdentify
-	opPresenceUpdate
-	opVoiceStateUpdate
+	opPresenceUpdate   //nolint:deadcode
+	opVoiceStateUpdate //nolint:deadcode
 	_
 	opResume
 	opReconnect
-	opRequestGuildMembers
+	opRequestGuildMembers //nolint:deadcode
 	opInvalidSession
 	opHello
 	opHeartbeatAck

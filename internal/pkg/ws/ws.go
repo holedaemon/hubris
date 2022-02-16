@@ -56,7 +56,10 @@ func (ws *Conn) Read(ctx context.Context) (io.Reader, error) {
 
 	var out bytes.Buffer
 
-	io.Copy(&out, zr)
+	_, err = io.Copy(&out, zr)
+	if err != nil {
+		return nil, err
+	}
 	zr.Close()
 	return &out, nil
 }
