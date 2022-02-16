@@ -2,38 +2,49 @@ package bot
 
 import (
 	"context"
+	"errors"
 	"math/rand"
 	"regexp"
-	"time"
 
-	"github.com/holedaemon/hubris/internal/discord/api/resources/guild"
 	"github.com/holedaemon/hubris/internal/discord/types"
 )
 
-type ActionType int
-
-const (
-	ActionTypeTimeout ActionType = 0
-)
-
 var (
-	regexWaste = regexp.MustCompile(`computer, ((e-?)?waste|ice|drop) this \w+`)
+	regexWaste = regexp.MustCompile(`(computer|boys), ((e-?)?waste|ice|drop) this \w+`)
 )
 
-var actions = map[*regexp.Regexp]ActionType{
-	regexWaste: ActionTypeTimeout,
+var actions = map[*regexp.Regexp]func(context.Context, *Context){
+	regexWaste: actionWaste,
 }
 
-func (b *Bot) TimeoutUser(ctx context.Context, gid, id string) error {
-	g := b.api.Guild(gid)
-
-	f := rand.Intn(10)
-	t := time.Now().Add(time.Duration(f) * time.Minute)
-
-	p := &guild.ModifyGuildMemberParams{
-		CommunicationDisabledUntil: types.TimeToTime(t),
+func actionWaste(ctx context.Context, c *Context) {
+	s := rand.Intn(99)
+	if s == 0 {
+		c.Reply(ctx, "why mafia isn't a fucking aesthetic: a thread")
+		return
 	}
 
-	_, err := g.ModifyGuildMember(ctx, gid, p)
-	return err
+	if c.Message.Type != types.MessageTypeReply {
+		c.Reply(ctx, "Who's are you'se wanting me to hit's, boss?")
+		return
+	}
+
+	err := c.Timeout(ctx)
+	if err != nil {
+		switch err := err.(type) {
+		case *types.Error:
+			c.Reply(ctx, "Sorry's boss, da feds gots in da way, boss: \"%s\"", err.Error())
+			return
+		default:
+			if errors.Is(err, errNotReply) {
+				c.Reply(ctx, "Sorry's boss, I am legally obligated to never lay's a finger on youse.")
+				return
+			}
+
+			c.Reply(ctx, "Sorry's boss, our's cover was blowns, we'll have to try agains")
+			return
+		}
+	}
+
+	c.Reply(ctx, "its dones, boss")
 }

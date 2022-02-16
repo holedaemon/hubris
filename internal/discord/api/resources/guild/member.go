@@ -11,12 +11,12 @@ import (
 )
 
 type ModifyGuildMemberParams struct {
-	Nick                       null.String `json:"nick,omitempty"`
-	Roles                      []string    `json:"roles,omitempty"`
-	Mute                       null.Bool   `json:"mute,omitempty"`
-	Deaf                       null.Bool   `json:"deaf,omitempty"`
-	ChannelID                  null.String `json:"channel_id,omitempty"`
-	CommunicationDisabledUntil types.Time  `json:"communication_disabled_until,omitempty"`
+	Nick                       *null.String `json:"nick,omitempty"`
+	Roles                      []string     `json:"roles,omitempty"`
+	Mute                       *null.Bool   `json:"mute,omitempty"`
+	Deaf                       *null.Bool   `json:"deaf,omitempty"`
+	ChannelID                  *null.String `json:"channel_id,omitempty"`
+	CommunicationDisabledUntil types.Time   `json:"communication_disabled_until,omitempty"`
 }
 
 func (r *Resource) ModifyGuildMember(ctx context.Context, id string, p *ModifyGuildMemberParams) (*types.GuildMember, error) {

@@ -3,7 +3,6 @@ package gateway
 import (
 	"context"
 	"encoding/json"
-	"time"
 
 	"github.com/holedaemon/hubris/internal/discord/types"
 	"github.com/zikaeroh/ctxlog"
@@ -15,9 +14,6 @@ type handler interface {
 }
 
 func (c *Client) handle(ctx context.Context, ev string, v interface{}) {
-	ctx, cancel := context.WithTimeout(ctx, time.Second*30)
-	defer cancel()
-
 	h, ok := c.handlers[ev]
 	if ok {
 		go h.Handle(ctx, v)

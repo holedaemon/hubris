@@ -18,9 +18,8 @@ type Bot struct {
 }
 
 type Options struct {
-	Logger *zap.Logger
-	Debug  bool
-	Token  string
+	Debug bool
+	Token string
 }
 
 func New(opts *Options) (*Bot, error) {
@@ -29,11 +28,7 @@ func New(opts *Options) (*Bot, error) {
 	}
 
 	b := &Bot{
-		logger: opts.Logger,
-	}
-
-	if b.logger == nil {
-		b.logger = ctxlog.New(opts.Debug)
+		logger: ctxlog.New(opts.Debug),
 	}
 
 	a, err := api.New(opts.Token)
