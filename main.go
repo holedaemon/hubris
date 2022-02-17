@@ -2,14 +2,18 @@ package main
 
 import (
 	"context"
+	"math/rand"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/alecthomas/kong"
 	"github.com/holedaemon/hubris/internal/pkg/cli"
 )
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
+
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Kill)
 	defer cancel()
 
