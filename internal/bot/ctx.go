@@ -16,6 +16,8 @@ import (
 
 var errNotReply = errors.New("not a reply")
 
+const timeoutUpper = 3
+
 type Context struct {
 	Message *types.Message
 
@@ -52,7 +54,7 @@ func (c *Context) Timeout(ctx context.Context) error {
 		return errNotReply
 	}
 
-	f := rand.Intn(10)
+	f := rand.Intn(timeoutUpper)
 	t := time.Now().Add(time.Duration(f) * time.Minute)
 
 	ctx = ctxlog.With(ctx, zap.String("user_id", c.Message.ReferencedMessage.Author.ID), zap.String("guild_id", c.Message.GuildID))
