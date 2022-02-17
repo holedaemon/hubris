@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/holedaemon/hubris/internal/discord/api/rate"
 	"github.com/holedaemon/hubris/internal/discord/types"
 )
 
@@ -28,12 +29,14 @@ func init() {
 type RestClient struct {
 	token string
 	cli   *http.Client
+	l     *rate.Limiter
 }
 
 func NewRestClient(token string, cli *http.Client) *RestClient {
 	return &RestClient{
 		token: token,
 		cli:   cli,
+		l:     rate.New(),
 	}
 }
 
@@ -93,6 +96,8 @@ func (rc *RestClient) do(ctx context.Context, url, meth string, opts ...RequestO
 	if err != nil {
 		return nil, err
 	}
+
+	rc.l.Wait(res)
 
 	if res.StatusCode < http.StatusOK || res.StatusCode >= http.StatusMultipleChoices {
 		return nil, types.NewError(res)
