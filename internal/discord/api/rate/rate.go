@@ -44,7 +44,9 @@ func (l *Limiter) wait(r *http.Response) {
 	} else {
 		bkt := r.Header.Get("X-RateLimit-Bucket")
 		b := l.buckets[bkt]
-		b.Wait()
+		if b != nil {
+			b.Wait()
+		}
 	}
 }
 
