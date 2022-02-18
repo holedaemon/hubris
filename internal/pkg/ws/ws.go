@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"compress/zlib"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"sync"
@@ -42,7 +43,7 @@ func (ws *Conn) Read(ctx context.Context) (io.Reader, error) {
 	ws.mu.RUnlock()
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("getting reader from conn: %w", err)
 	}
 
 	if mt == websocket.MessageText {
@@ -51,14 +52,14 @@ func (ws *Conn) Read(ctx context.Context) (io.Reader, error) {
 
 	zr, err := zlib.NewReader(rdr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decompressing reader: %w", err)
 	}
 
 	var out bytes.Buffer
 
 	_, err = io.Copy(&out, zr)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("copying reader: %w", err)
 	}
 	zr.Close()
 	return &out, nil
