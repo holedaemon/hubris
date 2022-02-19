@@ -5,7 +5,7 @@ import (
 	"runtime"
 
 	"github.com/holedaemon/hubris/internal/discord/types"
-	"github.com/holedaemon/hubris/internal/pkg/ws"
+	"nhooyr.io/websocket"
 )
 
 type identifyProperties struct {
@@ -30,7 +30,7 @@ type identify struct {
 	Intents  types.GatewayIntent `json:"intents"`
 }
 
-func (c *Client) sendIdentify(ctx context.Context, ws *ws.Conn) error {
+func (c *Client) sendIdentify(ctx context.Context, ws *websocket.Conn) error {
 	idf := &identify{
 		Token:      c.token,
 		Properties: defaultProperties,

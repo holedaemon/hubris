@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/holedaemon/hubris/internal/pkg/ws"
 	"nhooyr.io/websocket"
+	"nhooyr.io/websocket/wsjson"
 )
 
 var reconnectStatuses = map[websocket.StatusCode]bool{
@@ -49,7 +49,7 @@ func shouldReconnect(err error) bool {
 	return rec
 }
 
-func write(ctx context.Context, ws *ws.Conn, op opcode, v interface{}) error {
+func write(ctx context.Context, ws *websocket.Conn, op opcode, v interface{}) error {
 	p := &payload{
 		Op: op,
 	}
@@ -61,5 +61,5 @@ func write(ctx context.Context, ws *ws.Conn, op opcode, v interface{}) error {
 
 	p.D = raw
 
-	return ws.Write(ctx, p)
+	return wsjson.Write(ctx, ws, p)
 }

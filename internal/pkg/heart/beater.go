@@ -4,12 +4,12 @@ import (
 	"context"
 	"time"
 
-	"github.com/holedaemon/hubris/internal/pkg/ws"
 	"github.com/zikaeroh/ctxlog"
+	"nhooyr.io/websocket"
 )
 
 // Beat is called when Pump ticks.
-type Beat func(context.Context, *ws.Conn) error
+type Beat func(context.Context, *websocket.Conn) error
 
 type Beater struct {
 	ch chan time.Duration
@@ -25,7 +25,7 @@ func (b *Beater) Notify(nd time.Duration) {
 	b.ch <- nd
 }
 
-func (b *Beater) Pump(ctx context.Context, ws *ws.Conn, fn Beat) error {
+func (b *Beater) Pump(ctx context.Context, ws *websocket.Conn, fn Beat) error {
 	var tkr *time.Ticker
 
 	select {

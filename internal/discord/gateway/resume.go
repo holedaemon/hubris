@@ -3,7 +3,7 @@ package gateway
 import (
 	"context"
 
-	"github.com/holedaemon/hubris/internal/pkg/ws"
+	"nhooyr.io/websocket"
 )
 
 type resume struct {
@@ -12,7 +12,7 @@ type resume struct {
 	Seq       int64  `json:"seq"`
 }
 
-func (c *Client) sendResume(ctx context.Context, ws *ws.Conn) error {
+func (c *Client) sendResume(ctx context.Context, ws *websocket.Conn) error {
 	r := &resume{
 		Token:     c.token,
 		SessionID: c.sessionID,

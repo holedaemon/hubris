@@ -1,26 +1,50 @@
 package gateway
 
 import (
+	"bytes"
+	"compress/zlib"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"time"
 
-	"github.com/holedaemon/hubris/internal/pkg/ws"
+	"nhooyr.io/websocket"
 )
 
 var errReconnect = errors.New("reconnect")
 
-func (c *Client) read(ctx context.Context, ws *ws.Conn) error {
+func (c *Client) read(ctx context.Context, ws *websocket.Conn) error {
 	for {
-		reader, err := ws.Read(ctx)
+		mt, raw, err := ws.Read(ctx)
 		if err != nil {
-			return fmt.Errorf("%w: reading from conn", err)
+			return fmt.Errorf("reading from connection: %w", err)
+		}
+
+		in := bytes.NewReader(raw)
+		var out bytes.Buffer
+
+		if mt == websocket.MessageBinary {
+			zr, err := zlib.NewReader(in)
+			if err != nil {
+				return fmt.Errorf("decompressing reader: %w", err)
+			}
+
+			_, err = io.Copy(&out, zr)
+			if err != nil {
+				return fmt.Errorf("copying decompressed data to buffer: %w", err)
+			}
+
+			zr.Close()
+		} else if mt == websocket.MessageText {
+			if _, err := io.Copy(&out, in); err != nil {
+				return fmt.Errorf("copying data to buffer: %w", err)
+			}
 		}
 
 		var p *payload
-		if err := json.NewDecoder(reader).Decode(&p); err != nil {
+		if err := json.NewDecoder(&out).Decode(&p); err != nil {
 			return fmt.Errorf("%w: decoding JSON", err)
 		}
 

@@ -13,11 +13,11 @@ import (
 	"github.com/holedaemon/hubris/internal/discord/api"
 	"github.com/holedaemon/hubris/internal/pkg/exp"
 	"github.com/holedaemon/hubris/internal/pkg/heart"
-	"github.com/holedaemon/hubris/internal/pkg/ws"
 	"github.com/zikaeroh/ctxlog"
 	"go.uber.org/atomic"
 	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
+	"nhooyr.io/websocket"
 )
 
 const (
@@ -76,9 +76,11 @@ func (c *Client) connect(pc context.Context) error {
 	header := make(http.Header)
 	header.Set("Accept-Encoding", "zlib")
 
-	ws, err := ws.Dial(ctx, c.url, header)
+	ws, _, err := websocket.Dial(ctx, c.url, &websocket.DialOptions{
+		HTTPHeader: header,
+	})
 	if err != nil {
-		return err
+		return fmt.Errorf("dialing websocket: %w", err)
 	}
 
 	grp, ctx := errgroup.WithContext(ctx)
@@ -145,7 +147,7 @@ func (c *Client) Connect(pc context.Context) error {
 	return err
 }
 
-func (c *Client) beat(ctx context.Context, ws *ws.Conn) error {
+func (c *Client) beat(ctx context.Context, ws *websocket.Conn) error {
 	ctxlog.Debug(ctx, "sending heartbeat payload")
 	return write(ctx, ws, opHeartbeat, c.sequence.Load())
 }
