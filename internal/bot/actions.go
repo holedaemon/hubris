@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	regexWaste = regexp.MustCompile(`(computer|boys), ((e-?)?waste|ice|drop) this \w+`)
+	regexWaste = regexp.MustCompile(`(computer|boys), \w+ this \w+`)
 )
 
 var actions = map[*regexp.Regexp]func(context.Context, *Context){
