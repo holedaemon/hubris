@@ -43,6 +43,7 @@ func New(opts *Options) (*Bot, error) {
 		return nil, err
 	}
 
+	g.OnReady(b.handleReady)
 	g.OnMessageCreate(b.handleMessageCreate)
 
 	b.gateway = g
@@ -51,5 +52,8 @@ func New(opts *Options) (*Bot, error) {
 }
 
 func (b *Bot) Connect(ctx context.Context) error {
+	defer func() {
+		b.logger.Info("Connect() has finished")
+	}()
 	return b.gateway.Connect(ctx)
 }
