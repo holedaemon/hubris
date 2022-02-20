@@ -41,6 +41,7 @@ func actionWaste(ctx context.Context, c *Context) {
 		case *types.Error:
 			if err.Code == errCodeMissingPermissions {
 				c.Reply(ctx, reactions["yousuck"])
+				return
 			}
 
 			c.Reply(ctx, "Sorry's boss, da feds gots in da way: \"%s\"", err.Error())
@@ -54,6 +55,6 @@ func actionWaste(ctx context.Context, c *Context) {
 	if !self {
 		c.Reply(ctx, "its dones, boss")
 	} else {
-		c.Reply(ctx, "https://holedaemon.net/images/snipes.jpg")
+		c.Reply(ctx, reactions["snipes"])
 	}
 }
