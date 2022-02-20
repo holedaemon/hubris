@@ -2,7 +2,6 @@ package bot
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/rand"
 	"time"
@@ -14,9 +13,10 @@ import (
 	"go.uber.org/zap"
 )
 
-var errNotReply = errors.New("not a reply")
-
-const timeoutUpper = 3
+const (
+	timeoutCeiling = 30
+	timeoutFloor   = 10
+)
 
 type Context struct {
 	Message *types.Message
@@ -50,12 +50,8 @@ func (c *Context) Reply(ctx context.Context, msg string, args ...interface{}) {
 }
 
 func (c *Context) Timeout(ctx context.Context) error {
-	if c.Message.Type != types.MessageTypeReply {
-		return errNotReply
-	}
-
-	f := rand.Intn(timeoutUpper)
-	t := time.Now().Add(time.Duration(f) * time.Minute)
+	f := timeoutFloor + rand.Intn(timeoutCeiling-timeoutFloor+1)
+	t := time.Now().Add(time.Duration(f) * time.Second)
 
 	ctx = ctxlog.With(ctx, zap.String("user_id", c.Message.ReferencedMessage.Author.ID), zap.String("guild_id", c.Message.GuildID))
 	ctxlog.Info(ctx, "attempting to time out user", zap.Time("until", t))

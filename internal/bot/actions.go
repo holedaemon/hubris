@@ -2,7 +2,6 @@ package bot
 
 import (
 	"context"
-	"errors"
 	"math/rand"
 	"regexp"
 
@@ -36,11 +35,6 @@ func actionWaste(ctx context.Context, c *Context) {
 			c.Reply(ctx, "Sorry's boss, da feds gots in da way: \"%s\"", err.Error())
 			return
 		default:
-			if errors.Is(err, errNotReply) {
-				c.Reply(ctx, "Sorry's boss, I am legally obligated to never lay's a finger on youse.")
-				return
-			}
-
 			c.Reply(ctx, "Sorry's boss, our's cover was blowns, we'll have to try agains")
 			return
 		}
