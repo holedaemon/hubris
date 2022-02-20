@@ -21,6 +21,7 @@ type App struct {
 type Global struct {
 	Token         string `help:"The bot's OAuth2 token." required:"" short:"t" env:"HUBRIS_TOKEN"`
 	ApplicationID string `help:"OAuth2 application snowflake." required:"" short:"a" env:"HUBRIS_APP_ID"`
+	DSN           string `help:"PostgreSQL data connection string." required:"" short:"p" env:"HUBRIS_DSN"`
 }
 
 type VersionCmd struct{}

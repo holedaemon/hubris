@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/holedaemon/hubris/internal/bot"
+	"github.com/holedaemon/hubris/internal/database/dbx"
 )
 
 type RunCmd struct {
@@ -11,9 +12,15 @@ type RunCmd struct {
 }
 
 func (c *RunCmd) Run(ctx context.Context, g *Global) error {
+	db, err := dbx.Open(ctx, g.DSN)
+	if err != nil {
+		return err
+	}
+
 	b, err := bot.New(&bot.Options{
 		Debug: c.Debug,
 		Token: g.Token,
+		DB:    db,
 	})
 	if err != nil {
 		return err

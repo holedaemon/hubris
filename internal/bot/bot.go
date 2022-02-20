@@ -2,6 +2,7 @@ package bot
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/holedaemon/hubris/internal/discord/api"
@@ -15,11 +16,15 @@ type Bot struct {
 
 	api     *api.Client
 	gateway *gateway.Client
+
+	db *sql.DB
 }
 
 type Options struct {
 	Debug bool
 	Token string
+
+	DB *sql.DB
 }
 
 func New(opts *Options) (*Bot, error) {
@@ -29,6 +34,7 @@ func New(opts *Options) (*Bot, error) {
 
 	b := &Bot{
 		logger: ctxlog.New(opts.Debug),
+		db:     opts.DB,
 	}
 
 	a, err := api.New(opts.Token)
@@ -44,6 +50,7 @@ func New(opts *Options) (*Bot, error) {
 	}
 
 	g.OnReady(b.handleReady)
+	g.OnGuildCreate(b.handleGuildCreate)
 	g.OnMessageCreate(b.handleMessageCreate)
 
 	b.gateway = g
