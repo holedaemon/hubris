@@ -11,9 +11,19 @@ const (
 )
 
 type Interaction struct {
-	ID            string          `json:"id"`
-	ApplicationID string          `json:"application_id"`
-	Type          InteractionType `json:"type"`
+	ID            string           `json:"id"`
+	ApplicationID string           `json:"application_id"`
+	Type          InteractionType  `json:"type"`
+	Data          *InteractionData `json:"data,omitempty"`
+	GuildID       string           `json:"guild_id,omitempty"`
+	ChannelID     string           `json:"channel_id,omitempty"`
+	Member        *GuildMember     `json:"member,omitempty"`
+	User          *User            `json:"user,omitempty"`
+	Token         string           `json:"token"`
+	Version       int              `json:"version"`
+	Message       *Message         `json:"message,omitempty"`
+	Locale        string           `json:"locale,omitempty"`
+	GuildLocale   string           `json:"guild_locale"`
 }
 
 type InteractionData struct {

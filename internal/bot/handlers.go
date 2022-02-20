@@ -51,3 +51,7 @@ func (b *Bot) handleMessageCreate(ctx context.Context, m *types.Message) {
 		}
 	}
 }
+
+func (b *Bot) handleInteractionCreate(ctx context.Context, i *types.Interaction) {
+
+}
