@@ -8,6 +8,8 @@ import (
 	"github.com/holedaemon/hubris/internal/discord/types"
 )
 
+const errCodeMissingPermissions = 50013
+
 var (
 	regexWaste = regexp.MustCompile(`(computer|boys), \w+ this \w+`)
 )
@@ -37,6 +39,10 @@ func actionWaste(ctx context.Context, c *Context) {
 	if err != nil {
 		switch err := err.(type) {
 		case *types.Error:
+			if err.Code == errCodeMissingPermissions {
+				c.Reply(ctx, reactions["yousuck"])
+			}
+
 			c.Reply(ctx, "Sorry's boss, da feds gots in da way: \"%s\"", err.Error())
 			return
 		default:
