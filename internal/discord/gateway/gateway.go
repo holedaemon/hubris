@@ -69,7 +69,7 @@ func New(t string, opts ...Option) (*Client, error) {
 	return c, nil
 }
 
-func (c *Client) connect(pc context.Context) error {
+func (c *Client) connect() error {
 	ctx := context.Background()
 	ctx = ctxlog.WithLogger(ctx, c.logger)
 
@@ -118,11 +118,7 @@ func (c *Client) Connect(pc context.Context) error {
 		c.url = u + "?" + q.Encode()
 	}
 
-	err := c.connect(pc)
-	if err != nil {
-		return err
-	}
-
+	err := c.connect()
 	if shouldReconnect(err) {
 		for i := 0; true; i++ {
 			c.logger.Info("disconnected, attempting to reconnect", zap.Int("attempt", i))
@@ -130,8 +126,7 @@ func (c *Client) Connect(pc context.Context) error {
 
 			time.Sleep(dur)
 
-			ctx := context.Background()
-			err = c.connect(ctx)
+			err = c.connect()
 			if err != nil {
 				continue
 			}
@@ -139,8 +134,6 @@ func (c *Client) Connect(pc context.Context) error {
 			if !shouldReconnect(err) {
 				return err
 			}
-
-			continue
 		}
 	}
 

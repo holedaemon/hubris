@@ -36,7 +36,7 @@ func (b *Beater) Pump(ctx context.Context, ws *websocket.Conn, fn Beat) error {
 			tkr.Stop()
 		}
 
-		return ctx.Err()
+		return nil
 	}
 
 	for {
@@ -48,7 +48,7 @@ func (b *Beater) Pump(ctx context.Context, ws *websocket.Conn, fn Beat) error {
 			}
 		case <-ctx.Done():
 			tkr.Stop()
-			return ctx.Err()
+			return nil
 		}
 	}
 }
