@@ -28,6 +28,11 @@ func actionWaste(ctx context.Context, c *Context) {
 		return
 	}
 
+	var self bool
+	if c.Message.Author.ID == c.Message.ReferencedMessage.Author.ID {
+		self = true
+	}
+
 	err := c.Timeout(ctx)
 	if err != nil {
 		switch err := err.(type) {
@@ -40,5 +45,9 @@ func actionWaste(ctx context.Context, c *Context) {
 		}
 	}
 
-	c.Reply(ctx, "its dones, boss")
+	if !self {
+		c.Reply(ctx, "its dones, boss")
+	} else {
+		c.Reply(ctx, "https://holedaemon.net/images/snipes.jpg")
+	}
 }
