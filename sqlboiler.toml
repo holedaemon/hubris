@@ -1,0 +1,14 @@
+output = "internal/database/models"
+no-hooks = true
+no-rows-affected = true
+no-tests = true
+wipe = true
+
+[psql]
+dbname = "hubris"
+host = "localhost"
+port = 5432
+user = "hubris"
+pass = "hubris"
+sslmode = "disable"
+blacklist = ["schema_migrations"]
