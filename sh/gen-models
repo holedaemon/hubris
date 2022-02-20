@@ -2,10 +2,10 @@
 
 docker rm -f hpg
 
-docker run --name hpg -p 5432:5432 -e POSTGRES_USER=hubris -e POSTGRES_PASSWORD=hubris -e POSTGRES_DB=hubris -d --rm postgres
+docker run --name hpg --network host -e POSTGRES_USER=hubris -e POSTGRES_PASSWORD=hubris -e POSTGRES_DB=hubris -d --rm postgres
 
 sleep 5
 
-migrate -source file://$PWD/internal/database/migrations -database postgres://hubris:hubris@localhost:5432/hubris\?sslmode=disable up
+migrate -source file://$PWD/internal/database/migrations -database postgres://hubris:hubris@::1/hubris\?sslmode=disable up
 
 sqlboiler -c sqlboiler.toml psql
