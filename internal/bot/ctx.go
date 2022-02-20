@@ -18,6 +18,7 @@ const (
 	timeoutFloor   = 10
 )
 
+// Context provides useful context and helpers.
 type Context struct {
 	Message *types.Message
 
@@ -25,6 +26,7 @@ type Context struct {
 	Guild   *guild.Resource
 }
 
+// FromMessage creates a Context from a Message.
 func (b *Bot) FromMessage(m *types.Message) *Context {
 	return &Context{
 		Message: m,
@@ -34,6 +36,7 @@ func (b *Bot) FromMessage(m *types.Message) *Context {
 	}
 }
 
+// Reply sends a reply to the parent message.
 func (c *Context) Reply(ctx context.Context, msg string, args ...interface{}) {
 	_, err := c.Channel.CreateMessage(ctx,
 		channel.WithMessageContent(
@@ -49,6 +52,7 @@ func (c *Context) Reply(ctx context.Context, msg string, args ...interface{}) {
 	}
 }
 
+// Timeout times out a guild member for [timeoutFloor,timeoutCeiling].
 func (c *Context) Timeout(ctx context.Context) error {
 	f := timeoutFloor + rand.Intn(timeoutCeiling-timeoutFloor+1)
 	t := time.Now().Add(time.Duration(f) * time.Second)

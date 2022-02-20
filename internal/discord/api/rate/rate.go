@@ -5,6 +5,7 @@ import (
 	"sync"
 )
 
+// Limiter reads HTTP response headers to appropriate handle ratelimiting.
 type Limiter struct {
 	mu sync.Mutex
 
@@ -12,6 +13,7 @@ type Limiter struct {
 	buckets map[string]*bucket
 }
 
+// New creates a new Limiter.
 func New() *Limiter {
 	return &Limiter{
 		global:  new(bucket),

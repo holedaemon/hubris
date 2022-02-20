@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
+// Bot is a Discord API/Gateway client.
 type Bot struct {
 	logger *zap.Logger
 
@@ -20,6 +21,7 @@ type Bot struct {
 	db *sql.DB
 }
 
+// Options are used to configure a Bot client.
 type Options struct {
 	Debug bool
 	Token string
@@ -27,6 +29,7 @@ type Options struct {
 	DB *sql.DB
 }
 
+// New creates a new Bot from opts.
 func New(opts *Options) (*Bot, error) {
 	if opts.Token == "" {
 		return nil, fmt.Errorf("bot: token is blank")
@@ -58,6 +61,7 @@ func New(opts *Options) (*Bot, error) {
 	return b, nil
 }
 
+// Connect has the internal gateway client connect to Discord.
 func (b *Bot) Connect(ctx context.Context) error {
 	defer func() {
 		b.logger.Info("Connect() has finished")
