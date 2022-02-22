@@ -8,6 +8,7 @@ import (
 	"github.com/holedaemon/hubris/internal/discord/types"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/queries/qm"
+	"github.com/zikaeroh/ctxlog"
 	"go.uber.org/zap"
 )
 
@@ -53,5 +54,18 @@ func (b *Bot) handleMessageCreate(ctx context.Context, m *types.Message) {
 }
 
 func (b *Bot) handleInteractionCreate(ctx context.Context, i *types.Interaction) {
+	switch i.Type {
+	case types.InteractionTypeApplicationCommand:
+		cm, ok := b.appCommands[i.Data.Name]
+		if !ok {
+			ctxlog.Info(ctx, "received interaction for command that is not handled")
 
+			cctx := NewCommandContext(i)
+
+			if err := cm(ctx, cctx); err != nil {
+				ctxlog.Error(ctx, "error running command", zap.Error(err), zap.String("guild_id", i.GuildID))
+				return
+			}
+		}
+	}
 }

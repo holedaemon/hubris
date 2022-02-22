@@ -13,12 +13,12 @@ import (
 
 // Bot is a Discord API/Gateway client.
 type Bot struct {
-	logger *zap.Logger
+	appCommands map[string]ApplicationCommand
 
+	logger  *zap.Logger
 	api     *api.Client
 	gateway *gateway.Client
-
-	db *sql.DB
+	db      *sql.DB
 }
 
 // Options are used to configure a Bot client.
@@ -36,8 +36,9 @@ func New(opts *Options) (*Bot, error) {
 	}
 
 	b := &Bot{
-		logger: ctxlog.New(opts.Debug),
-		db:     opts.DB,
+		appCommands: make(map[string]ApplicationCommand),
+		logger:      ctxlog.New(opts.Debug),
+		db:          opts.DB,
 	}
 
 	a, err := api.New(opts.Token)
@@ -55,6 +56,7 @@ func New(opts *Options) (*Bot, error) {
 	g.OnReady(b.handleReady)
 	g.OnGuildCreate(b.handleGuildCreate)
 	g.OnMessageCreate(b.handleMessageCreate)
+	g.OnInteractionCreate(b.handleInteractionCreate)
 
 	b.gateway = g
 

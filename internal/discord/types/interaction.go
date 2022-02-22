@@ -47,3 +47,22 @@ type ResolvedData struct {
 	Messages map[string]*Message     `json:"messages,omitempty"`
 	// Attachments
 }
+
+type InteractionCallbackType int
+
+const (
+	InteractionCallbackTypePong InteractionCallbackType = iota + 1
+	_
+	_
+	InteractionCallbackTypeChannelMessageWithSource
+	InteractionCallbackTypeDeferredChannelMessageWithSource
+	InteractionCallbackTypeDeferredUpdateMessages
+	InteractionCallbackTypeUpdateMessage
+	InteractionCallbackTypeApplicationCommandAutocompleteResult
+	InteractionCallbackTypeModal
+)
+
+type InteractionResponse struct {
+	Type InteractionCallbackType `json:"type"`
+	Data interface{}             `json:"data,omitempty"`
+}

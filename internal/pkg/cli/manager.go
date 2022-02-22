@@ -2,7 +2,10 @@ package cli
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/holedaemon/hubris/internal/discord/api"
@@ -38,10 +41,24 @@ func (c *ManagerAddCmd) Run(ctx context.Context, g *Global) error {
 			continue
 		}
 
-		files = append(files, file.Name())
+		files = append(files, filepath.Join(c.Directory, file.Name()))
 	}
 
 	ap := make([]*types.ApplicationCommand, 0, len(files))
+
+	for _, f := range files {
+		dat, err := os.Open(f)
+		if err != nil {
+			return fmt.Errorf("reading JSON file: %w", err)
+		}
+
+		var apc *types.ApplicationCommand
+		if err := json.NewDecoder(dat).Decode(&apc); err != nil {
+			return err
+		}
+
+		ap = append(ap, apc)
+	}
 
 	cli, err := api.New(g.Token)
 	if err != nil {
@@ -95,6 +112,11 @@ func (c *ManagerListCmd) Run(ctx context.Context, g *Global) error {
 
 	if err != nil {
 		return err
+	}
+
+	if len(ap) == 0 {
+		fmt.Println("No commands.")
+		return nil
 	}
 
 	tbl := table.New("Name", "ID", "Type", "Description")
